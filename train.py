@@ -13,51 +13,53 @@ import requests
 
 
 def get_trains():
-    # This is the API call to MBTA to get the train times
-    # inputs: none
-    # outputs: 2 arrays
-    #   1. Times of arrival for each train
-    #   2. Destination of each train
-
+    '''
+     This is the API call to MBTA to get the train times
+     inputs: none
+     outputs: 2 arrays
+       1. Times of arrival for each train
+       2. Destination of each train
+    '''
     try:
-        trips = requests.get(
-            "https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip",
-                             timeout=5).json()
+        trips = requests.get("https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip", timeout=5).json()
     except requests.exceptions.Timeout:
         print("Timed Out")
 
 
-    tripIDs_prediction = []
-    arrivalTimes_prediction = []
-    tripIDs_included = []
+    trip_ids_prediction = []
+    arrival_times_prediction = []
+    trip_ids_included = []
     direction_included = []
 
     datalength = len(trips["data"])
     for i in range(datalength):
-        tripIDs_prediction.append(trips["data"][i]["relationships"]["trip"]["data"]["id"])
-        arrivalTimes_prediction.append(trips["data"][i]["attributes"]["arrival_time"])
+        trip_ids_prediction.append(trips["data"][i]["relationships"]["trip"]["data"]["id"])
+        arrival_times_prediction.append(trips["data"][i]["attributes"]["arrival_time"])
 
 
-        tripIDs_included.append(trips["included"][i]["id"])
+        trip_ids_included.append(trips["included"][i]["id"])
         direction_included.append(trips["included"][i]["attributes"]["headsign"])
 
     matched = []
-    for tripi in tripIDs_prediction:
-        matched.append(tripIDs_included.index(tripi))
+    for tripi in trip_ids_prediction:
+        matched.append(trip_ids_included.index(tripi))
 
     dir_sort = [direction_included[i] for i in matched]
 
-    return arrivalTimes_prediction, dir_sort
+    return arrival_times_prediction, dir_sort
 
 
 def simplify_data(arrivals, directions):
+    '''
+    Takes the the output of the api and takes just the 2 trips that will be soonest for each train
+    '''
     now = datetime.datetime.now()
 
     alewife = []
     ashmont = []
     braintree = []
     dir_dict = {"Alewife":alewife,"Ashmont":ashmont,"Braintree":braintree}
-    
+
     for i,arri in enumerate(arrivals):
         if len(alewife)==2 & len(braintree)==2 & len(ashmont)==2:
             break
@@ -69,7 +71,9 @@ def simplify_data(arrivals, directions):
             arrival_date,arrival_time = arri.split("T")
             arrival_time = list(map(int,arrival_time.split("-")[0].split(":")))
 
-            diff = (arrival_time[0] -now.hour)*60 + (arrival_time[1]-now.minute)  + (arrival_time[2]-now.second)*1/60#+ int((arrival_time[2]-now.second)>0)
+            diff = (arrival_time[0] -now.hour)*60 +\
+            (arrival_time[1]-now.minute)  +\
+                  (arrival_time[2]-now.second)*1/60
             if diff<1:
                 diff = 0
             else:
@@ -80,10 +84,14 @@ def simplify_data(arrivals, directions):
     return dir_dict
 
 
-def text_gen(trainTimes):
+def text_gen(train_times):
+    """
+    Takes simplified train times and constructs 
+    the final string used for the widget
+    """
     alltext = ""
     for train in ["Alewife","Ashmont","Braintree"]:
-        traintext = train + ":   " + str(trainTimes[train][0])+ " , " + str(trainTimes[train][1]) + " minutes away"
+        traintext = train + ":   " + str(train_times[train][0])+ " , " + str(train_times[train][1]) + " minutes away"
         alltext = alltext + traintext + "\n\n"
 
     alltext = alltext[:-2]
@@ -99,6 +107,14 @@ print(data)
 
 
 def loop():
+    """
+    The main loop that is needed to update the widget. 
+    1. calls api
+    2. simplifies api output
+    3. constructs string
+
+    returns just the final string
+    """
     times, directions = get_trains()
 
     times_simple = simplify_data(times,directions)
@@ -117,7 +133,7 @@ root.geometry("1000x600+50+50")
 text = tk.Text(root,font=("Helvetica", 45),bg="black",fg="white")
 text.pack()
 
-while(True):
+while True:
 
     text.delete("1.0", "end")
     new_text = loop()
