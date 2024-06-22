@@ -1,14 +1,30 @@
-import requests
+'''
+The point of the script is to display the upcoming train times for davis station. 
+
+It is done by calling the MBTA api, organizing this data, and then displaying the result.
+
+'''
+
+
 import datetime
 import tkinter as tk
 import time
-
-key = "282c97aea67046e4a847e745fde9d329"
+import requests
 
 
 def get_trains():
+    # This is the API call to MBTA to get the train times
+    # inputs: none
+    # outputs: 2 arrays
+    #   1. Times of arrival for each train
+    #   2. Destination of each train
 
-    trips = requests.get("https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip").json()
+    try:
+        trips = requests.get(
+            "https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip",
+                             timeout=5).json()
+    except requests.exceptions.Timeout:
+        print("Timed Out")
 
 
     tripIDs_prediction = []
@@ -64,10 +80,10 @@ def simplify_data(arrivals, directions):
     return dir_dict
 
 
-def text_gen(data):
+def text_gen(trainTimes):
     alltext = ""
     for train in ["Alewife","Ashmont","Braintree"]:
-        traintext = train + ":   " + str(data[train][0])+ " , " + str(data[train][1]) + " minutes away"
+        traintext = train + ":   " + str(trainTimes[train][0])+ " , " + str(trainTimes[train][1]) + " minutes away"
         alltext = alltext + traintext + "\n\n"
 
     alltext = alltext[:-2]
@@ -83,13 +99,13 @@ print(data)
 
 
 def loop():
-    arr, direction = get_trains()
+    times, directions = get_trains()
 
-    data = simplify_data(arr,direction)
+    times_simple = simplify_data(times,directions)
 
-    texts = text_gen(data)
+    train_times_simple = text_gen(times_simple)
 
-    return texts
+    return train_times_simple
 
 
 
