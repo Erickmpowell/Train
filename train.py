@@ -20,8 +20,11 @@ def get_trains():
        1. Times of arrival for each train
        2. Destination of each train
     '''
+
+    api_address = "https://api-v3.mbta.com/predictions"  +\
+          "?filter[stop]=place-davis&filter[route]=Red&include=trip"
     try:
-        trips = requests.get("https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip", timeout=5).json()
+        trips = requests.get(api_address, timeout=5).json()
     except requests.exceptions.Timeout:
         print("Timed Out")
 
@@ -91,7 +94,8 @@ def text_gen(train_times):
     """
     alltext = ""
     for train in ["Alewife","Ashmont","Braintree"]:
-        traintext = train + ":   " + str(train_times[train][0])+ " , " + str(train_times[train][1]) + " minutes away"
+        traintext = train + ":   " + str(train_times[train][0])+\
+              " , " + str(train_times[train][1]) + " minutes away"
         alltext = alltext + traintext + "\n\n"
 
     alltext = alltext[:-2]
@@ -124,9 +128,29 @@ def loop():
     return train_times_simple
 
 
+class update_train(tk.Text):
+    def __init__(self,*args,**kwargs):
+        tk.Text.__init__(self,*args,**kwargs)
+        self._count = 0
 
+    def update(self):
+        self.delete("1.0","end")
+        updated_text = loop()
+        self.insert(tk.END,updated_text)
+        self._count +=1
+        self.after(5000,self.update)        
 
 root = tk.Tk()
+
+mywidget = update_train(root,font=("Helvetica", 45),bg="black",fg="white")
+mywidget.pack()
+mywidget.update()
+root.mainloop()
+
+print("STOP FIGHTING")
+time.sleep(10)
+
+
 root.title("MBTA prediction")
 root.minsize(625,225)
 root.geometry("1000x600+50+50")
