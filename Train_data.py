@@ -1,20 +1,7 @@
-'''
-The point of the script is to display the upcoming train times for davis station. 
-
-It is done by calling the MBTA api, organizing this data, and then displaying the result.
-
-'''
-
-
 import datetime
-import tkinter as tk
+
 import time
 import requests
-import matplotlib
-matplotlib.use("TkAgg")
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
 
 def get_trains():
     '''
@@ -24,7 +11,7 @@ def get_trains():
        1. Times of arrival for each train
        2. Destination of each train
     '''
-
+    #Perhaps this URL? https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip,vehicle
     api_address = "https://api-v3.mbta.com/predictions"  +\
           "?filter[stop]=place-davis&filter[route]=Red&include=trip"
     try:
@@ -104,17 +91,9 @@ def text_gen(train_times):
 
     alltext = alltext[:-2]
     return alltext
-#print(alewife,ashmont,braintree)
-
-arr, direction = get_trains()
-
-data = simplify_data(arr,direction)
-
-print(data)
 
 
-
-def loop():
+def train_loop():
     """
     The main loop that is needed to update the widget. 
     1. calls api
@@ -128,61 +107,5 @@ def loop():
     times_simple = simplify_data(times,directions)
 
     train_times_simple = text_gen(times_simple)
-
+    print("AgainD")
     return train_times_simple
-
-
-class update_train(tk.Text):
-    def __init__(self,*args,**kwargs):
-        tk.Text.__init__(self,*args,**kwargs)
-        self._count = 0
-
-    def update(self):
-        self.delete("1.0","end")
-        updated_text = loop()
-        self.insert(tk.END,updated_text)
-        self._count +=1
-        self.after(5000,self.update)        
-
-root = tk.Tk()
-
-mywidget = update_train(root,font=("Helvetica", 45),bg="black",fg="white")
-mywidget.pack()
-mywidget.update()
-
-
-root.minsize(625,225)
-root.title("MBTA prediction")
-root.geometry("1000x600+50+50")
-
-
-print("Main loop")
-root.mainloop()
-print("STOP FIGHTING")
-time.sleep(2)
-
-fig = plt.figure(1)
-
-plt.plot([1,2,3,4],[2,3,4,3])
-canvas = FigureCanvasTkAgg(fig, master=root)
-plot_widget = canvas.get_tk_widget()
-fig.canvas.draw()
-plot_widget.grid(row=0, column=0)
-
-
-text = tk.Text(root,font=("Helvetica", 45),bg="black",fg="white")
-text.pack()
-
-
-
-
-
-
-
-while True:
-
-    text.delete("1.0", "end")
-    new_text = loop()
-    text.insert(tk.END,new_text)
-    text.update()
-    time.sleep(5)
