@@ -3,9 +3,9 @@ import tkinter as tk
 # importing frames that we will create soon!
 from TextWidget.TextWidget import TextWidget
 from Frame2 import Frame2
-from Frame3 import Frame3
-from DataFrame import DataFrame
-from Train_data import train_loop_plus_position
+from LocalMap.LocalMap import Frame3
+from DataFrame.DataFrame import DataFrame
+from DataFrame.Train_data import train_loop
 
 
 class Main(tk.Tk):
@@ -33,7 +33,7 @@ class Main(tk.Tk):
             height=self.height,
             width=self.width,
         )
-        container.__setattr__("local_trains", train_loop_plus_position())
+        container.__setattr__("local_trains", train_loop())
         container.__setattr__("global_trains", 0)
 
         print(type(container))

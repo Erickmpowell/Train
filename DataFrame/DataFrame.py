@@ -1,5 +1,8 @@
 import tkinter as tk
-from Train_data import train_loop_plus_position
+print("yopo")
+from DataFrame.Train_data import train_loop
+
+
 
 
 class DataFrame(tk.Frame):
@@ -11,7 +14,7 @@ class DataFrame(tk.Frame):
 
         self.label.pack(side="bottom")
 
-        self.update_local = train_loop_plus_position
+        self.update_local = train_loop
 
         self.update_data(ParentFrame)
 
@@ -24,6 +27,4 @@ class DataFrame(tk.Frame):
     def update_data(self, ParentFrame):
         ParentFrame.local_trains = self.update_local()
         ParentFrame.global_trains += self.update_global()
-        print("local trains (Frame 4):", ParentFrame.local_trains)
-        print("Global trains (Frame 4):", ParentFrame.global_trains)
         self.after(5000, self.update_data, ParentFrame)
