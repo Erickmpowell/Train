@@ -109,7 +109,10 @@ def simplify_data(arrivals, directions, positions):
             '''print(
                 directions[i], " is ", diff, " minutes away and at ", position
             )  # ,arrivalTimes_prediction[i] )'''
-
+    print(len(dir_dict["Alewife"]["ETA"]),len(dir_dict["Braintree"]["ETA"]),len(dir_dict["Ashmont"]["ETA"]))
+    dir_dict["Alewife"]["ETA"]=[dir_dict["Alewife"]["ETA"][0]]
+    dir_dict["Alewife"]["position"]=[dir_dict["Alewife"]["position"][0] ]
+    print(len(dir_dict["Alewife"]["ETA"]),len(dir_dict["Braintree"]["ETA"]),len(dir_dict["Ashmont"]["ETA"]))
     return dir_dict
 
 
@@ -121,14 +124,17 @@ def text_gen(train_times):
     """
     alltext = ""
     for train in ["Alewife", "Ashmont", "Braintree"]:
-        traintext = (
-            train
-            + ":   "
-            + str(train_times[train]["ETA"][0])
-            + " , "
-            + str(train_times[train]["ETA"][1])
-            + " minutes away"
-        )
+        if len(train_times[train]["ETA"])>0:
+            traintext = (
+                train
+                + ":   "
+                + str(train_times[train]["ETA"][0]))
+            if len(train_times[train]["ETA"])>1:
+                traintext+= (" , "
+            + str(train_times[train]["ETA"][1]))
+            traintext+= " minutes away"
+        else:
+            traintext= "No Train :("
         alltext = alltext + traintext + "\n\n"
 
     alltext = alltext[:-2]

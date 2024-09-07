@@ -100,13 +100,15 @@ class Frame3(tk.Frame):
         
         directions = train_data.keys()
         coordinates = []
-        
+        num_trains = 0
         for direction_i in directions:
             coord_i = train_data[direction_i]["position"]
+            print(type(train_data[direction_i]["position"]),train_data[direction_i]["position"])
+            num_trains+=len(train_data[direction_i]["position"])
             coordinates.append(coord_i)
             
-        
-        coordinates = np.array(coordinates).reshape(2*len(directions),2)
+        print(np.array(coordinates))
+        coordinates = np.array(coordinates,dtype=object).reshape(num_trains,2)
         coordx, coordy = coordinates[:,0],coordinates[:,1]
         print(coordinates,"\n")
         
