@@ -71,16 +71,34 @@ class Frame3(tk.Frame):
         
         canvas = FigureCanvasTkAgg(fig, self)
         directions, coordy, coordx = self.get_train_pos(ParentFrame)
-        print(directions, coordx, coordy)
         self.plotme(canvas, ax, coordx, coordy,m)
         self.update_plot(canvas, ax, coordx, coordy,m,ParentFrame)
         plt.close()
 
+    def labelmap(self, ax,m):
+        davis = [42.396667, -71.121667 ]
+        alewife = [42.395638, -71.141228]
+        porter = [42.388409, -71.118880 ]
+
+        
+        davisxy = m.to_pixels(davis)
+        ax.text(davisxy[0],davisxy[1],"Davis",fontsize=35)
+        ax.scatter(davisxy[0],davisxy[1],c="k",s=50)
+
+        alewifexy = m.to_pixels(alewife)
+        ax.text(alewifexy[0],alewifexy[1],"Alewife",fontsize=35)
+        ax.scatter(alewifexy[0],alewifexy[1],c="k",s=50)
+
+        porterxy = m.to_pixels(porter)
+        ax.text(porterxy[0],porterxy[1],"Porter",fontsize=35)
+        ax.scatter(porterxy[0],porterxy[1],c="k",s=50)
 
     def plotme(self, canvas, ax, xs, ys,m):
-        #ax.clear()
+        ax.clear()
+        m.show_mpl(ax = ax)
+        self.labelmap(ax,m)
         xlim,ylim = ax.get_xlim(),ax.get_ylim()
-        coordx, coordy = m.to_pixels(ys,xs)
+        coordx, coordy = m.to_pixels(ys.astype(float),xs.astype(float))
         ax.set_ylim(ylim)
         ax.set_xlim(xlim)
         ax.scatter(coordx, coordy,c="r",s=75)
@@ -90,6 +108,7 @@ class Frame3(tk.Frame):
 
 
     def update_plot(self, canvas, ax, xs, ys,m,ParentFrame):
+
         directions, coordy, coordx = self.get_train_pos(ParentFrame)
         self.plotme(canvas, ax,coordx, coordy,m)
         #print("plot device: ", ys)
@@ -99,17 +118,15 @@ class Frame3(tk.Frame):
         train_data = ParentFrame.local_trains
         
         directions = train_data.keys()
-        coordinates = []
+        coordinates = np.array([])
         num_trains = 0
         for direction_i in directions:
-            coord_i = train_data[direction_i]["position"]
-            print(type(train_data[direction_i]["position"]),train_data[direction_i]["position"])
-            num_trains+=len(train_data[direction_i]["position"])
-            coordinates.append(coord_i)
+            coord_i = np.array(train_data[direction_i]["position"],dtype=float)
             
-        print(np.array(coordinates))
+            num_trains+=len(train_data[direction_i]["position"])
+            coordinates = np.append(coordinates,coord_i.flatten())
+            
         coordinates = np.array(coordinates,dtype=object).reshape(num_trains,2)
         coordx, coordy = coordinates[:,0],coordinates[:,1]
-        print(coordinates,"\n")
-        
+       
         return directions, coordx, coordy
