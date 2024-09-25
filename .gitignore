@@ -1,9 +1,5 @@
 cairns_gtfs.zip
 cairns_gtfs.zip:Zone.Identifier
-__pycache__/DataFrame.cpython-38.pyc
-__pycache__/Frame1.cpython-38.pyc
-__pycache__/Frame2.cpython-38.pyc
-__pycache__/Frame3.cpython-38.pyc
-__pycache__/Frame4.cpython-38.pyc
-__pycache__/Train_data.cpython-38.pyc
-TextWidget/__pycache__/TextWidget.cpython-38.pyc
+__pycache__
+**/__pycache__/
+logging.txt
