@@ -6,6 +6,7 @@ from Frame2 import Frame2
 from LocalMap.LocalMap import Frame3
 from DataFrame.DataFrame import DataFrame
 from DataFrame.Train_data import train_loop
+import time
 
 
 class Main(tk.Tk):
@@ -48,10 +49,15 @@ class Main(tk.Tk):
         self.frames = {}
 
         # Use container as master frame for imported frames
+        t0 = time.time()
         for Frame in (TextWidget, Frame2, Frame3, DataFrame):
-            self.frames[Frame] = Frame(container)
+            t1 = time.time()
             print("working on:\t", Frame)
+            self.frames[Frame] = Frame(container)
             self.frames[Frame].grid(row=0, column=0, sticky="nsew")
+            print("Time elapsed:",t1-t0)
+            t0=t1
+            
         # Define buttons to switch GUI pages
         self.frame1_btn = tk.Button(
             self, text="Frame1", font=("Arial", 10), command=self.show_textwidget

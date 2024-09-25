@@ -15,10 +15,16 @@ def get_trains():
         + "?filter[stop]=place-davis&filter[route]=Red&include=trip,vehicle"
     )
     try:
-        trips = requests.get(api_address, timeout=5).json()
+        trip_request = requests.get(api_address, timeout=5)
+        trips = trip_request.json()
     except requests.exceptions.Timeout:
         print("Timed Out")
 
+    with open("logging.txt","w") as f:
+        f.write("Time:")
+        f.write(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+        f.write("\n\n")
+        f.write(trip_request.text)
     trip_ids_prediction = []
     Vehicle_ids_prediction = []
     arrival_times_prediction = []
