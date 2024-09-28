@@ -13,8 +13,8 @@ class TextWidget(tk.Text):
         #self.label = tk.Label(self, text="App_Name: Frame1", font=("Arial", 20))
         train_data = ParentFrame.local_trains
         train_text = text_gen(train_data)
-        today = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        train_text += "\n\nLast Update: "+today
+        lastupdate = ParentFrame.last_update
+        train_text += "\n\nLast Update: "+lastupdate.strftime("%m/%d/%Y, %H:%M:%S")
         self.insert(tk.END, train_text)
         #self.label.pack(side="top")
         self.update_text(ParentFrame)
@@ -23,8 +23,8 @@ class TextWidget(tk.Text):
         self.delete("1.0", "end")
         train_data = ParentFrame.local_trains
         train_text = text_gen(train_data)
-        today = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        train_text += "\n\nLast Update: "+today
+        lastupdate = ParentFrame.last_update
+        train_text += "\n\nLast Update: "+lastupdate.strftime("%m/%d/%Y, %H:%M:%S")
         self.insert(tk.END, train_text)
         self._count += 1
         self.after(10000, self.update_text, ParentFrame)

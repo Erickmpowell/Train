@@ -7,6 +7,7 @@ from LocalMap.LocalMap import Frame3
 from DataFrame.DataFrame import DataFrame
 from DataFrame.Train_data import train_loop
 import time
+import datetime
 
 
 class Main(tk.Tk):
@@ -36,7 +37,9 @@ class Main(tk.Tk):
         )
         container.__setattr__("local_trains", train_loop())
         container.__setattr__("global_trains", 0)
-
+        container.__setattr__("trains_json",0)
+        container.__setattr__("last_update",datetime.datetime.now())
+            
         print(type(container))
         # Pack the container to the root
         container.pack(side="top", fill="both", expand=True)

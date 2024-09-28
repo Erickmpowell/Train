@@ -3,3 +3,4 @@ cairns_gtfs.zip:Zone.Identifier
 __pycache__
 **/__pycache__/
 logging.txt
+*.pyc
