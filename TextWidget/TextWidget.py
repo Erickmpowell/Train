@@ -27,4 +27,4 @@ class TextWidget(tk.Text):
         train_text += "\n\nLast Update: "+lastupdate.strftime("%m/%d/%Y, %H:%M:%S")
         self.insert(tk.END, train_text)
         self._count += 1
-        self.after(10000, self.update_text, ParentFrame)
+        self.after(5000, self.update_text, ParentFrame)

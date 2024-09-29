@@ -5,7 +5,7 @@ from TextWidget.TextWidget import TextWidget
 from Frame2 import Frame2
 from LocalMap.LocalMap import Frame3
 from DataFrame.DataFrame import DataFrame
-from DataFrame.Train_data import train_loop
+from DataFrame.Train_data import get_train_json,process_train_json
 import time
 import datetime
 
@@ -35,9 +35,20 @@ class Main(tk.Tk):
             height=self.height,
             width=self.width,
         )
-        container.__setattr__("local_trains", train_loop())
+        
+        ### Get first api call
+        
+        api_call,success = None, False
+        while not(success): 
+            api_call,success = get_train_json()
+        
+        First_trains = process_train_json(api_call)
+
+        
+        container.__setattr__("local_trains", First_trains)
+        print("asdfad")
         container.__setattr__("global_trains", 0)
-        container.__setattr__("trains_json",0)
+        container.__setattr__("trains_json",api_call)
         container.__setattr__("last_update",datetime.datetime.now())
             
         print(type(container))

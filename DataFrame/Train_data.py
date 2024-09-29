@@ -1,80 +1,10 @@
 import datetime
 import requests
 import json
-
-def get_trains():
-    """
-    This is the API call to MBTA to get the train times
-    inputs: none
-    outputs: 2 arrays
-      1. Times of arrival for each train
-      2. Destination of each train
-    """
-    # Perhaps this URL? https://api-v3.mbta.com/predictions?filter[stop]=place-davis&filter[route]=Red&include=trip,vehicle
-    api_address = (
-        "https://api-v3.mbta.com/predictions"
-        + "?filter[stop]=place-davis&filter[route]=Red&include=trip,vehicle"
-    )
-    try:
-        trip_request = requests.get(api_address, timeout=5)
-        trips = trip_request.json()
-    except requests.exceptions.Timeout:
-        print("Timed Out")
-
-    with open("logging.txt", "w") as f:
-        f.write("Time:")
-        f.write(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
-        f.write("\n\n")
-        formatted_train_string = json.dumps(trip_request.text,indent=2)
-        f.write(formatted_train_string)
-
-    trip_ids_prediction = []
-    Vehicle_ids_prediction = []
-    arrival_times_prediction = []
-
-    trip_ids_trips = []
-    direction_trips = []
-
-    Vehicle_ids_vehicles = []
-    position_vehicles = []
-
-    datalength = len(trips["data"])
-    for i in range(datalength):
-        trip_ids_prediction.append(
-            trips["data"][i]["relationships"]["trip"]["data"]["id"]
-        )
-        Vehicle_ids_prediction.append(
-            trips["data"][i]["relationships"]["vehicle"]["data"]["id"]
-        )
-        arrival_times_prediction.append(trips["data"][i]["attributes"]["arrival_time"])
-
-    for included_i in trips["included"]:
-        if included_i["type"] == "trip":
-            trip_ids_trips.append(included_i["id"])
-            direction_trips.append(included_i["attributes"]["headsign"])
-
-        if included_i["type"] == "vehicle":
-            Vehicle_ids_vehicles.append(included_i["id"])
-            position_vehicles.append(
-                [
-                    included_i["attributes"]["latitude"],
-                    included_i["attributes"]["longitude"],
-                ]
-            )
-
-    trip_match = []
-    vehicle_match = []
-    for tripi in trip_ids_prediction:
-        trip_match.append(trip_ids_trips.index(tripi))
-    for vehiclei in Vehicle_ids_prediction:
-        vehicle_match.append(Vehicle_ids_vehicles.index(vehiclei))
-
-    dir_sort = [direction_trips[i] for i in trip_match]
-    position_sorted = [position_vehicles[i] for i in vehicle_match]
-
-    return arrival_times_prediction, dir_sort, position_sorted
+import time
 
 def get_train_json():
+    t0 = time.time()
     """
     This is the API call to MBTA to get the train times
     inputs: none
@@ -111,6 +41,7 @@ def get_train_json():
         api_log.write("\n\n")
         formatted_train_string = json.dumps(trip_request.text,indent=2)
         api_log.write(formatted_train_string)
+
 
     return trips_json, success
 
@@ -160,8 +91,10 @@ def process_train_json(train_json):
 
     dir_sort = [direction_trips[i] for i in trip_match]
     position_sorted = [position_vehicles[i] for i in vehicle_match]
+    
+    dir_dict = simplify_data(arrival_times_prediction, dir_sort, position_sorted)
 
-    return arrival_times_prediction, dir_sort, position_sorted
+    return dir_dict
 
 
 def simplify_data(arrivals, directions, positions):
@@ -203,22 +136,6 @@ def simplify_data(arrivals, directions, positions):
             dir_dict[train]["ETA"].append(diff)
             dir_dict[train]["position"].append([position])
 
-            """
-            print(
-                directions[i], " is ", diff, " minutes away and at ", position
-            )  # ,arrivalTimes_prediction[i] )
-            """
-    """        
-    print(len(dir_dict["Alewife"]["ETA"]),len(dir_dict["Braintree"]["ETA"]),len(dir_dict["Ashmont"]["ETA"]))
-    dir_dict["Alewife"]["ETA"]=[]
-    dir_dict["Alewife"]["position"]=[ ]
-    dir_dict["Braintree"]["ETA"]=[]
-    dir_dict["Braintree"]["position"]=[ ]
-    dir_dict["Ashmont"]["ETA"]=[]
-    dir_dict["Ashmont"]["position"]= []
-    print(len(dir_dict["Alewife"]["ETA"]),len(dir_dict["Braintree"]["ETA"]),len(dir_dict["Ashmont"]["ETA"]))
-    """
-
     return dir_dict
 
 
@@ -240,10 +157,3 @@ def text_gen(train_times):
 
     alltext = alltext[:-2]
     return alltext
-
-
-def train_loop():
-    times, directions, positions = get_trains()
-    times_simple = simplify_data(times, directions, positions)
-
-    return times_simple
