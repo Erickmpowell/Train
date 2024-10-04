@@ -46,12 +46,12 @@ class Main(tk.Tk):
 
         
         container.__setattr__("local_trains", First_trains)
-        print("asdfad")
         container.__setattr__("global_trains", 0)
         container.__setattr__("trains_json",api_call)
         container.__setattr__("last_update",datetime.datetime.now())
+        container.__setattr__("stale_update",False)
             
-        print(type(container))
+        
         # Pack the container to the root
         container.pack(side="top", fill="both", expand=True)
 

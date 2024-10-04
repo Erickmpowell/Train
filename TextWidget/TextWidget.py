@@ -1,5 +1,5 @@
 import tkinter as tk
-from DataFrame.Train_data import text_gen
+from DataFrame.Train_data import text_gen,stale_update_text
 import datetime
 
 class TextWidget(tk.Text):
@@ -20,11 +20,21 @@ class TextWidget(tk.Text):
         self.update_text(ParentFrame)
 
     def update_text(self, ParentFrame):
+        
         self.delete("1.0", "end")
-        train_data = ParentFrame.local_trains
-        train_text = text_gen(train_data)
+        
         lastupdate = ParentFrame.last_update
-        train_text += "\n\nLast Update: "+lastupdate.strftime("%m/%d/%Y, %H:%M:%S")
-        self.insert(tk.END, train_text)
+        last_update_txt = "\n\nLast Update: "+lastupdate.strftime("%m/%d/%Y, %H:%M:%S")
+        if ParentFrame.stale_update:
+            stale_update_message = stale_update_text()
+            final_text = stale_update_message+last_update_txt
+        else:
+            
+            train_data = ParentFrame.local_trains
+            train_text = text_gen(train_data)
+            final_text =train_text +last_update_txt 
+        self.insert(tk.END, final_text)
         self._count += 1
         self.after(5000, self.update_text, ParentFrame)
+
+        

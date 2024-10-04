@@ -3,8 +3,8 @@ import requests
 import json
 import time
 
+
 def get_train_json():
-    t0 = time.time()
     """
     This is the API call to MBTA to get the train times
     inputs: none
@@ -17,19 +17,18 @@ def get_train_json():
         "https://api-v3.mbta.com/predictions"
         + "?filter[stop]=place-davis&filter[route]=Red&include=trip,vehicle"
     )
-    
-    
+
     current_time = datetime.datetime.now()
     try:
         trip_request = requests.get(api_address, timeout=5)
         trips_json = trip_request.json()
         success = True
-        
+
     except requests.exceptions.RequestException as error:
         print("Ooops exception happened")
         trips_json = None
-        success=False
-        with open("error.txt","w") as error_file:
+        success = False
+        with open("error.txt", "w") as error_file:
             error_file.write("Time:")
             error_file.write(current_time.strftime("%m/%d/%Y, %H:%M:%S"))
             error_file.write("\n\n")
@@ -39,15 +38,13 @@ def get_train_json():
         api_log.write("Time:")
         api_log.write(current_time.strftime("%m/%d/%Y, %H:%M:%S"))
         api_log.write("\n\n")
-        formatted_train_string = json.dumps(trip_request.text,indent=2)
+        formatted_train_string = json.dumps(trip_request.text, indent=2)
         api_log.write(formatted_train_string)
-
 
     return trips_json, success
 
 
 def process_train_json(train_json):
-    
     trip_ids_prediction = []
     Vehicle_ids_prediction = []
     arrival_times_prediction = []
@@ -66,7 +63,9 @@ def process_train_json(train_json):
         Vehicle_ids_prediction.append(
             train_json["data"][i]["relationships"]["vehicle"]["data"]["id"]
         )
-        arrival_times_prediction.append(train_json["data"][i]["attributes"]["arrival_time"])
+        arrival_times_prediction.append(
+            train_json["data"][i]["attributes"]["arrival_time"]
+        )
 
     for included_i in train_json["included"]:
         if included_i["type"] == "trip":
@@ -91,7 +90,7 @@ def process_train_json(train_json):
 
     dir_sort = [direction_trips[i] for i in trip_match]
     position_sorted = [position_vehicles[i] for i in vehicle_match]
-    
+
     dir_dict = simplify_data(arrival_times_prediction, dir_sort, position_sorted)
 
     return dir_dict
@@ -156,4 +155,11 @@ def text_gen(train_times):
         alltext = alltext + traintext + "\n\n"
 
     alltext = alltext[:-2]
+    return alltext
+
+def stale_update_text():
+    alltext = ""
+    for train in ["Alewife", "Ashmont", "Braintree"]:
+        stale_train_txt = train + ":\t" + "No data :(" + "\n\n"
+        alltext+=stale_train_txt
     return alltext
