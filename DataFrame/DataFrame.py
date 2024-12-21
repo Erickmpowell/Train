@@ -29,8 +29,16 @@ class DataFrame(tk.Frame):
         return 2
 
     def update_data(self, ParentFrame):
+        ParentFrame.iters+=1
+        print("Iterations: ",ParentFrame.iters)
         trains_json, success = self.update_json()
-
+        if ParentFrame.iters>1:
+            trains_json = {"data":[],"jsonapi":{"version":"1.0"}}
+        
+        if "included" not in trains_json.keys():
+            success= False 
+            ParentFrame.stale_update = True
+            
         current_time = datetime.datetime.now()
 
         if success:
@@ -38,11 +46,12 @@ class DataFrame(tk.Frame):
             ParentFrame.last_update = current_time
             ParentFrame.stale_update = False
             ParentFrame.local_trains = self.process_json(trains_json)
-
+        '''
         else:
-            if (current_time - ParentFrame.last_update) < datetime.timedelta(minutes=1):
+            if (current_time - ParentFrame.last_update) < datetime.timedelta(seconds=10):
                 ParentFrame.local_trains = self.process_json(trains_json)
             else:
                 ParentFrame.stale_update = True
+        '''
 
         self.after(5000, self.update_data, ParentFrame)

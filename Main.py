@@ -50,6 +50,7 @@ class Main(tk.Tk):
         container.__setattr__("trains_json",api_call)
         container.__setattr__("last_update",datetime.datetime.now())
         container.__setattr__("stale_update",False)
+        container.__setattr__("iters",0)
             
         
         # Pack the container to the root
