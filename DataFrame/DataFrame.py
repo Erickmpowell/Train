@@ -32,8 +32,7 @@ class DataFrame(tk.Frame):
         ParentFrame.iters+=1
         print("Iterations: ",ParentFrame.iters)
         trains_json, success = self.update_json()
-        if ParentFrame.iters>1:
-            trains_json = {"data":[],"jsonapi":{"version":"1.0"}}
+
         
         if "included" not in trains_json.keys():
             success= False 
