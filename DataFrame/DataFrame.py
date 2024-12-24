@@ -32,12 +32,15 @@ class DataFrame(tk.Frame):
         ParentFrame.iters+=1
         print("Iterations: ",ParentFrame.iters)
         trains_json, success = self.update_json()
-
-        
-        if "included" not in trains_json.keys():
-            success= False 
-            ParentFrame.stale_update = True
+        print(trains_json)
+        try:
+            self.process_json(trains_json)
+            ParentFrame.stale_update = False
             
+        except:
+            ParentFrame.stale_update = True
+            success = False
+                        
         current_time = datetime.datetime.now()
 
         if success:

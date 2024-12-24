@@ -54,7 +54,9 @@ def process_train_json(train_json):
 
     Vehicle_ids_vehicles = []
     position_vehicles = []
-
+    print(train_json)
+    if "included" not in train_json.keys():
+        return simplify_data([], [],[])
     datalength = len(train_json["data"])
     for i in range(datalength):
         trip_ids_prediction.append(
@@ -106,7 +108,8 @@ def simplify_data(arrivals, directions, positions):
     ashmont = {"ETA": [], "position": []}
     braintree = {"ETA": [], "position": []}
     dir_dict = {"Alewife": alewife, "Ashmont": ashmont, "Braintree": braintree}
-
+    if arrivals == []:
+        return dir_dict
     for i, arri in enumerate(arrivals):
         if (
             len(alewife["ETA"])
