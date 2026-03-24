@@ -179,8 +179,102 @@ def get_train_json():
 
     return trips_json, success
 
-
 def process_train_json(train_json):
+    trip_ids_prediction = []
+    arrival_times_prediction = []
+
+    trip_ids_trips = []
+    direction_trips = []
+
+
+    #print(train_json)
+    
+    if "included" not in train_json.keys():
+        return simplify_data([], [],[])
+    
+    
+    datalength = len(train_json["data"])
+    
+    for i in range(datalength):
+        #train color
+        trip_ids_prediction.append(
+            train_json["data"][i]["relationships"]["trip"]["data"]["id"]
+        )
+        
+        #arrival time
+        arrival_times_prediction.append(
+            train_json["data"][i]["attributes"]["arrival_time"]
+        )
+
+    for included_i in train_json["included"]:
+        if included_i["type"] == "trip":
+            trip_ids_trips.append(included_i["id"])
+            direction_trips.append(included_i["attributes"]["headsign"])
+
+
+    ### Calculate arrival time -now
+    #sort that list
+    #use that sorting on both the arrival time and direction list
+    
+    trip_match = []
+    for tripi in trip_ids_prediction:
+        trip_match.append(trip_ids_trips.index(tripi))
+
+
+    dir_sort = [direction_trips[i] for i in trip_match]
+    
+    dir_dict = simplify_data(arrival_times_prediction, dir_sort)
+
+    return dir_dict
+
+def simplify_data(arrivals, directions):
+    """
+    Takes the the output of the api and takes just the 2 trips that will be soonest for each train
+    """
+    now = datetime.datetime.now()
+
+    alewife = {"ETA": [], "position": []}
+    ashmont = {"ETA": [], "position": []}
+    braintree = {"ETA": [], "position": []}
+    dir_dict = {"Alewife": alewife, "Ashmont": ashmont, "Braintree": braintree}
+    if arrivals == []:
+        return dir_dict
+    for i, arri in enumerate(arrivals):
+        if (
+            len(alewife["ETA"])
+            == 2 & len(braintree["ETA"])
+            == 2 & len(ashmont["ETA"])
+            == 2
+        ):
+            break
+
+        train = directions[i]
+
+        if len(dir_dict[train]["ETA"]) < 2:
+            if arri == None:
+                arrival_time = datetime.datetime.now() + datetime.timedelta(minutes=60)
+                arrival_time = [arrival_time.hour,arrival_time.minute,arrival_time.second ]
+            else:
+                arrival_date, arrival_time = arri.split("T")
+                arrival_time = list(map(int, arrival_time.split("-")[0].split(":")))
+
+            diff = (
+                (arrival_time[0] - now.hour) * 60
+                + (arrival_time[1] - now.minute)
+                + (arrival_time[2] - now.second) * 1 / 60
+            )
+            if diff < 1:
+                diff = 0
+            elif diff>30:
+                continue
+            else:
+                diff = int(diff)
+            dir_dict[train]["ETA"].append(diff)
+
+    return dir_dict
+
+
+def process_train_json_with_position(train_json):
     trip_ids_prediction = []
     Vehicle_ids_prediction = []
     arrival_times_prediction = []
@@ -241,8 +335,7 @@ def process_train_json(train_json):
 
     return dir_dict
 
-
-def simplify_data(arrivals, directions, positions):
+def simplify_data_with_position(arrivals, directions, positions):
     """
     Takes the the output of the api and takes just the 2 trips that will be soonest for each train
     """
