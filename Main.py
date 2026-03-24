@@ -155,27 +155,51 @@ def get_train_json():
     )
 
     current_time = datetime.datetime.now()
-    try:
-        trip_request = requests.get(api_address, timeout=5)
-        trips_json = trip_request.json()
-        success = True
+    success=False
+    while not(success):
+        try:
+            trip_request = requests.get(api_address, timeout=5)
+            trips_json = trip_request.json()
+            success = True
 
-    except requests.exceptions.RequestException as error:
-        print("Ooops exception happened")
-        trips_json = None
-        success = False
-        with open("error.txt", "w") as error_file:
-            error_file.write("Time:")
-            error_file.write(current_time.strftime("%m/%d/%Y, %H:%M:%S"))
-            error_file.write("\n\n")
-            error_file.write(error.response.text)
+        # except requests.exceptions.RequestException as error:
+        #     print("Ooops exception happened")
+        #     trips_json = None
+        #     success = False
+        #     with open("error.txt", "w") as error_file:
+        #         error_file.write("Time:")
+        #         error_file.write(current_time.strftime("%m/%d/%Y, %H:%M:%S"))
+        #         error_file.write("\n\n")
+        #         error_file.write(error.response.text)
+        except requests.exceptions.HTTPError as errh:
+            print("HTTP Error")
+            print(errh.args[0])
+            time.sleep(60)
+            print("Was a nice sleep, now let me continue...")
+            continue
+        except requests.exceptions.ReadTimeout as errrt:
+            print("Time out")
+            time.sleep(60)
+            print("Was a nice sleep, now let me continue...")
+            continue
+        except requests.exceptions.ConnectionError as conerr:
+            print("Connection error")
+            time.sleep(60)
+            print("Was a nice sleep, now let me continue...")
+            continue
+        except requests.exceptions.RequestException as errex:
+            print("Exception request")
+            time.sleep(60)
+            print("Was a nice sleep, now let me continue...")
+            continue
 
-    with open("api_log.txt", "w") as api_log:
-        api_log.write("Time:")
-        api_log.write(current_time.strftime("%m/%d/%Y, %H:%M:%S"))
-        api_log.write("\n\n")
-        formatted_train_string = json.dumps(trip_request.text, indent=2)
-        api_log.write(formatted_train_string)
+            
+        with open("api_log.txt", "w") as api_log:
+            api_log.write("Time:")
+            api_log.write(current_time.strftime("%m/%d/%Y, %H:%M:%S"))
+            api_log.write("\n\n")
+            formatted_train_string = json.dumps(trip_request.text, indent=2)
+            api_log.write(formatted_train_string)
 
     return trips_json, success
 
@@ -190,7 +214,7 @@ def process_train_json(train_json):
     #print(train_json)
     
     if "included" not in train_json.keys():
-        return simplify_data([], [],[])
+        return simplify_data([], [])
     
     
     datalength = len(train_json["data"])
